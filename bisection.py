@@ -110,6 +110,8 @@ def derCosineWeights(parameters):
     par1=(parameters[1]*parameters[3])
     par2=(parameters[2]+math.pi/2)
     return [0, par1 ,par2,parameters[3],parameters[5],0]
+"""
+#this was all testing code to make sure it all ran well
 #######################
 
 #######################
@@ -138,4 +140,4 @@ for polyWeights in testWeights:
     duration = end - start
 
     print "Using Newtons Method:This is the root:",root," It took",i,"steps to get there.and it took:",duration
-
+"""

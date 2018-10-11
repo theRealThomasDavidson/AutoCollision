@@ -1,6 +1,5 @@
 import math
-
-
+import bisection
 def findSidesAtStart (centerLocation, sideLength):
     """
     finds the corners of a square that describes the vehicle
@@ -150,16 +149,14 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
     timeofPeakAfterExit=endTime+ (radSpeed*(lastPossibleAngle%math.pi))
     peakTimeIntervals=radSpeed/math.pi                              #describes half of a period
     numOfPasses=int(math.floor(((timeOfPreviousPeak-timeofPeakAfterExit)/peakTimeIntervals)+.5))-1
+    #parameters finding the crossing point between the min of circle square and the max of linear square
+    cosineParams1=[(centerOfCircle-circleSqEdge),radius,startAngle,radSpeed,linSqBounds[0],dimensionalVelocity]
 
-    for i in range (0,numOfPasses):
-        sTime=timeOfPreviousPeak+(peakTimeIntervals*i)
-        eTime=timeOfPreviousPeak+(peakTimeIntervals*i+1)
-        ##check to see how many passes are possible.
-        linStart= linearMotion(firstPossibleCirSquareBounds,dimensionalVelocity,sTime)
-        if dimensionalVelocity>(1/radSpeed):
-            #number of passes can be up to 3
-        else:
-            #number of passes can only be 1
-            linStart[0]=sin(t*radSpeed)-dimensionalVelocity*t
-            
+    #parameters finding the crossing point between the max of circle square and the min of linear square
+    cosineParams2=[(centerOfCircle+circleSqEdge),radius,startAngle,radSpeed,linSqBounds[1],dimensionalVelocity]
+    #TODO find when we need to check multiple times in  half period,
+    #TODO find where we need to check between if multiple times will be
+
+
+print bisection.derCosineWeights([1,2,3,4,5,6])
 
