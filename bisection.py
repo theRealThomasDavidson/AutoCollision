@@ -72,7 +72,7 @@ def bisectionMethod(highGuess,lowGuess,polyWeights,iterations,isHighGuessEstimat
     elif(number< 0):
         return bisectionMethod(highGuess, estimate, polyWeights, (iterations + 1),False,errorTolerence)
     return None
-def newtonMethod(highGuess,lowGuess,polyWeights,iterations,errorTolerence):
+def newtonMethod(highGuess,lowGuess,polyWeights,iterations,errorTolerence,derCosW):
 
     """
 
@@ -84,7 +84,6 @@ def newtonMethod(highGuess,lowGuess,polyWeights,iterations,errorTolerence):
     :return:
     """
 
-    derCosW=derCosineWeights(polyWeights)
     estimate = (highGuess + lowGuess) / 2
     newGuess=estimate-(cosineFunction(estimate,polyWeights)/cosineFunction(estimate,derCosW))
     error=abs((highGuess-newGuess)/newGuess)

@@ -120,11 +120,20 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
     overlap of the two squares in this dimension starts and the second element is when it ends. the list will have a
     tuple for each separate incident of overlap
     """
+    ##########################
 
+    ##########################
+
+    errorTolerence=.000000000000001
+
+    ##########################
+
+    ##########################
 
     ##TODO if deminsionalVelocity is 0 we need to figure out how long we run this for
     ##TODO cont do we even run this side or should we have another function
     circleSqEdge= abs((cirSqBounds[0]-cirSqBounds[1]))/2                      #actually describes half of the length of the edge
+
     circleLimitsMin=centerOfCircle-radius-circleSqEdge
     circleLimitsMax=centerOfCircle+radius+circleSqEdge
     squaresInQuestionTime1=(linSqBounds[0]-circleLimitsMin)/dimensionalVelocity
@@ -154,9 +163,50 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
 
     #parameters finding the crossing point between the max of circle square and the min of linear square
     cosineParams2=[(centerOfCircle+circleSqEdge),radius,startAngle,radSpeed,linSqBounds[1],dimensionalVelocity]
-    #TODO find when we need to check multiple times in  half period,
-    #TODO find where we need to check between if multiple times will be
+    #the derivative of both of thesee will be the same.
+    derCosineParams=bisection.derCosineWeights(cosineParams1)
+    maxDerivCos= derCosineParams[1]                   #ask Thomas about this
+    zerosLinMax=[]
+    zerosLinMin=[]
+
+    if isPeakMax:               #current derivative goes down
+        if -maxDerivCos<dimensionalVelocity and dimensionalVelocity<0:
+            q=1
+            print "hello"
+            #TODO find where we need to check between for possible multiple crossings
+            #TODO implement a method that works like below with the checks as bounds
+        else:
+            for i in range (0,numOfPasses):
+                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence)
+                zerosLinMin.append(zero)
+                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams2, 0, errorTolerence)
+                zerosLinMax.append(zero)
+    else:
+        if maxDerivCos>dimensionalVelocity and dimensionalVelocity>0:
+            #TODO find where we need to check between for possible multiple crossings
+            #TODO implement a method that works like below with the checks as bounds
+            q=1
+            print"hey"
+        else:
+            for i in range (0,numOfPasses):
+                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence,derCosineParams)
+                zerosLinMin.append(zero)
+                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams2, 0, errorTolerence,derCosineParams)
+                zerosLinMax.append(zero)
+    return zerosLinMax,zerosLinMin
 
 
 print bisection.derCosineWeights([1,2,3,4,5,6])
+linearStartLocation=(-10.0,-10.0)
+cirSquareStartLoc=(0.0,5.0)
+linearSideLength=2
+cirSquareSideLength=2
+cirSpeed=900
+dimensionalXVelocity=1
+centerOfCir=(0.0,0.0)
+cirSquareStartBoundsx,cirSquareStartBoundsy=findSidesAtStart(cirSquareStartLoc,cirSquareSideLength)
+radius,startAngle=getCricleStart(cirSquareStartLoc,centerOfCir)
+radSpeed=speedInRadians(radius,cirSpeed)
 
+xBounds,yBounds=findSidesAtStart(linearStartLocation,linearSideLength)
+print findDimensionalOverlapTime(cirSquareStartBoundsx,xBounds,startAngle,radSpeed,radius,centerOfCir[0],dimensionalXVelocity )
