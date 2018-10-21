@@ -175,6 +175,8 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
             print "hello"
             #TODO find where we need to check between for possible multiple crossings
             #TODO implement a method that works like below with the checks as bounds
+            #we can do this by finding the roots of the derivative and you check from the first peak to the first 0,
+            # from the first 0 to the second 0, then from the second 0 to the last peak.
         else:
             for i in range (0,numOfPasses):
                 zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence)
@@ -183,7 +185,7 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
                 zerosLinMax.append(zero)
     else:
         if maxDerivCos>dimensionalVelocity and dimensionalVelocity>0:
-            #TODO find where we need to check between for possible multiple crossings
+            #TODO find where we need to ch eck between for possible multiple crossings
             #TODO implement a method that works like below with the checks as bounds
             q=1
             print"hey"
@@ -194,15 +196,67 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
                 zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams2, 0, errorTolerence,derCosineParams)
                 zerosLinMax.append(zero)
     return zerosLinMax,zerosLinMin
+def collisionTimeFromOverlaps(lstXOverlaps,lstYOverlaps):
+    """
+    this function will find the collision time if you input the times where objects overlap in the x direction and where
+     they overlap in the y directions
+    :param lstXOverlap: a list of tuples in the form [(dbl,dbl),...] where each tuples describes an overlap and the
+    first dbl in the tuple is the begining time of an overlap and the second dbl is the time that an overlap ends in the
+    x dimension.
+    :param lstYOverlap: a list of tuples in the form [(dbl,dbl),...] where each tuples describes an overlap and the
+    first dbl in the tuple is the begining time of an overlap and the second dbl is the time that an overlap ends in the
+    y dimension.
+    :return: a dbl that describes the first overlap time, or None if no overlap is detected.
+    """
+
+    earliestCollision=float('inf')
+    for xOverlap in lstXOverlaps:
+        for yOverlap in lstYOverlaps:
+            if xOverlap[0]>yOverlap[0] and xOverlap[0]<yOverlap[1]:
+                earliestCollision=min(earliestCollision,xOverlap[0])
+
+            if yOverlap[0] > xOverlap[0] and yOverlap[0] < xOverlap[1]:
+                earliestCollision = min(earliestCollision, yOverlap[0])
+    if earliestCollision==float('inf'):
+        earliestCollision=None
+    return earliestCollision
 
 
+
+"""
+
+
+print "here we start the angle check."
+squarePoss=[(1,1),(-1,1),(1,-1),(-1,-1)]
+for pos in squarePoss:
+    print "circle pos",pos,getCricleStart(pos,(0,0))
+
+
+print "here we end the angle check."
+"""
+print "here we start checking collision from overlap"
+lstTestCases=[]
+#first we check for a list with 1 collision ;expectyed output: 4 :pass
+lstTestCases.append(([(4.0,5.0)],[(2.0,4.5)]))
+#check for a list with no collision; expected output:None : pass
+lstTestCases.append(([(1.0,2.0)],[(0.2,0.5),(3.0,5.2)]))
+#check for a list with multiple collision; expected output:2.0 :pass
+lstTestCases.append(([(1.40,2.1),(3.2,5.3),(6.4,7.8)],[(2.0,3.5),(4.0,7.2)]))
+
+
+for testCase in lstTestCases:
+    xOverlap=testCase[0]
+    yOverlap=testCase[1]
+    print collisionTimeFromOverlaps(xOverlap,yOverlap)
+
+print "here we stop checking collision from overlap"
 print bisection.derCosineWeights([1,2,3,4,5,6])
 linearStartLocation=(-10.0,-10.0)
 cirSquareStartLoc=(0.0,5.0)
 linearSideLength=2
 cirSquareSideLength=2
 cirSpeed=900
-dimensionalXVelocity=1
+dimensionalXVelocity=8000
 centerOfCir=(0.0,0.0)
 cirSquareStartBoundsx,cirSquareStartBoundsy=findSidesAtStart(cirSquareStartLoc,cirSquareSideLength)
 radius,startAngle=getCricleStart(cirSquareStartLoc,centerOfCir)
