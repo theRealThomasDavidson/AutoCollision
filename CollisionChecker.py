@@ -146,11 +146,17 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
         endTime = squaresInQuestionTime2
 
     #here we see where the circle square is at the start
+    print "start time",startTime
+
     firstPossibleAngle=(startAngle+(startTime*radSpeed))%(2*math.pi)
+    print "start angle", firstPossibleAngle
     lastPossibleAngle=(startAngle+(endTime*radSpeed))%(2*math.pi)
+    print "last angle", lastPossibleAngle
     firstPossibleCirSquareBounds=cicularMotion(cirSqBounds, radius,radSpeed,startAngle,startTime)
     firstPeakBefore=math.floor((firstPossibleAngle/math.pi))
+    print "yo hey",firstPeakBefore
     isPeakMax=True                          #this describes if the angle of the last peak was at 0 (true) or pi (false)
+    print "hi there",firstPeakBefore
     if (firstPeakBefore+2)%2==1:
         isPeakMax = False
     ##if it is false we will have the cosine as a negative.
@@ -236,7 +242,7 @@ print "here we end the angle check."
 """
 print "here we start checking collision from overlap"
 lstTestCases=[]
-#first we check for a list with 1 collision ;expectyed output: 4 :pass
+#first we check for a list with 1 collision ;expected output: 4 :pass
 lstTestCases.append(([(4.0,5.0)],[(2.0,4.5)]))
 #check for a list with no collision; expected output:None : pass
 lstTestCases.append(([(1.0,2.0)],[(0.2,0.5),(3.0,5.2)]))
