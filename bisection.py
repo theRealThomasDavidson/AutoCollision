@@ -90,7 +90,7 @@ def newtonMethod(highGuess,lowGuess,polyWeights,iterations,errorTolerence,derCos
     if error<errorTolerence:
         return estimate,iterations
     else:
-        return newtonMethod(newGuess, newGuess,polyWeights,iterations+1,errorTolerence)
+        return newtonMethod(newGuess, newGuess,polyWeights,iterations+1,errorTolerence,derCosW)
 def cosineFunction(x,parameters):
 
     """

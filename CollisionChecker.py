@@ -258,7 +258,7 @@ def collisionTimeFromOverlaps(lstXOverlaps,lstYOverlaps):
 file input
 """
 
-file1 = open("input")
+file1 = open("input.txt")
 lines = file1.read().split('\n')
 line1 = lines[1].split(' ')
 line2 = lines[2].split(' ')
