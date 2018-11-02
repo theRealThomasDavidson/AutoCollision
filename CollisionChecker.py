@@ -1,11 +1,14 @@
 import math
 import bisection
+
+
+
 def findSidesAtStart (centerLocation, sideLength):
     """
     finds the corners of a square that describes the vehicle
     :param centerLocation: is a tuple of the form (dbl,dbl) where the first element is the x location of the center and
     the second element is the y location of the center
-    :param sideLength: is a dbl describing the length of each side 
+    :param sideLength: is a dbl describing the length of each side
     :return: returns 2 tuples of the form (dbl,dbl) where the first element is the max and the second element is the min
      of the sides of the square, the first tuples describes
     this in the x dimension and the second describes this in the y dimension
@@ -60,7 +63,8 @@ def getCricleStart(centerOfSquare,centerOfCircle):
         angle = math.pi - angle
         if ydif==0:
 
-            if not xPosBool:angle=math.pi
+            # if not xPosBool:
+            angle=math.pi
     return (radius,angle)
 def cricleStartYComp(angle):
     """
@@ -132,6 +136,10 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
 
     ##TODO if deminsionalVelocity is 0 we need to figure out how long we run this for
     ##TODO cont do we even run this side or should we have another function
+
+
+
+
     circleSqEdge= abs((cirSqBounds[0]-cirSqBounds[1]))/2                      #actually describes half of the length of the edge
 
     circleLimitsMin=centerOfCircle-radius-circleSqEdge
@@ -155,15 +163,14 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
     firstPossibleCirSquareBounds=cicularMotion(cirSqBounds, radius,radSpeed,startAngle,startTime)
     firstPeakBefore=math.floor((firstPossibleAngle/math.pi))
     print "yo hey",firstPeakBefore
-    isPeakMax=True                          #this describes if the angle of the last peak was at 0 (true) or pi (false)
-    print "hi there",firstPeakBefore
-    if (firstPeakBefore+2)%2==1:
-        isPeakMax = False
+
     ##if it is false we will have the cosine as a negative.
     timeOfPreviousPeak=startTime-(radSpeed*(firstPossibleAngle%math.pi))            #describes the time of the last peak before entering the area where they might interact
     timeofPeakAfterExit=endTime+ (radSpeed*(lastPossibleAngle%math.pi))
     peakTimeIntervals=radSpeed/math.pi                              #describes half of a period
-    numOfPasses=int(math.floor(((timeOfPreviousPeak-timeofPeakAfterExit)/peakTimeIntervals)+.5))-1
+    """
+    """
+    numOfPasses=int(math.floor(((timeofPeakAfterExit-timeOfPreviousPeak)/peakTimeIntervals)+.5))-1
     #parameters finding the crossing point between the min of circle square and the max of linear square
     cosineParams1=[(centerOfCircle-circleSqEdge),radius,startAngle,radSpeed,linSqBounds[0],dimensionalVelocity]
 
@@ -174,33 +181,51 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
     maxDerivCos= derCosineParams[1]                   #ask Thomas about this
     zerosLinMax=[]
     zerosLinMin=[]
+    for i in range(0, numOfPasses):
 
-    if isPeakMax:               #current derivative goes down
-        if -maxDerivCos<dimensionalVelocity and dimensionalVelocity<0:
-            q=1
-            print "hello"
-            #TODO find where we need to check between for possible multiple crossings
-            #TODO implement a method that works like below with the checks as bounds
-            #we can do this by finding the roots of the derivative and you check from the first peak to the first 0,
-            # from the first 0 to the second 0, then from the second 0 to the last peak.
+        isPeakMax = True  # this describes if the angle of the last peak was at 0 (true) or pi (false)
+        print("peaktimestuff")
+        print(timeOfPreviousPeak)
+        print(peakTimeIntervals)
+        print((timeOfPreviousPeak+peakTimeIntervals * (i-1)) + 2)
+        if (int((timeOfPreviousPeak+peakTimeIntervals * (i-1))) + 2) % 2 == 1:
+            isPeakMax = False
+        if isPeakMax:               #current derivative goes down
+            if -maxDerivCos<dimensionalVelocity and dimensionalVelocity<0:
+                q=1
+                print "hello"
+                #TODO find where we need to check between for possible multiple crossings
+                #TODO implement a method that works like below with the checks as bounds
+                #we can do this by finding the roots of the derivative and you check from the first peak to the first 0,
+                # from the first 0 to the second 0, then from the second 0 to the last peak.
+            else:
+                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence, derCosineParams)
+                if(zero in zerosLinMin):
+                    dummy = "us"
+                else:
+                    zerosLinMin.append(zero)
+                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams2, 0, errorTolerence, derCosineParams)
+                if (zero in zerosLinMax):
+                    dummy = "us"
+                else:
+                    zerosLinMax.append(zero)
         else:
-            for i in range (0,numOfPasses):
-                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence)
-                zerosLinMin.append(zero)
-                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams2, 0, errorTolerence)
-                zerosLinMax.append(zero)
-    else:
-        if maxDerivCos>dimensionalVelocity and dimensionalVelocity>0:
-            #TODO find where we need to ch eck between for possible multiple crossings
-            #TODO implement a method that works like below with the checks as bounds
-            q=1
-            print"hey"
-        else:
-            for i in range (0,numOfPasses):
+            if maxDerivCos>dimensionalVelocity and dimensionalVelocity>0:
+                #TODO find where we need to check between for possible multiple crossings
+                #TODO implement a method that works like below with the checks as bounds
+                q=1
+                print"hey"
+            else:
                 zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence,derCosineParams)
-                zerosLinMin.append(zero)
+                if(zero in zerosLinMin):
+                    print()
+                else:
+                    zerosLinMin.append(zero)
                 zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams2, 0, errorTolerence,derCosineParams)
-                zerosLinMax.append(zero)
+                if (zero in zerosLinMax):
+                    print()
+                else:
+                    zerosLinMax.append(zero)
     return zerosLinMax,zerosLinMin
 def collisionTimeFromOverlaps(lstXOverlaps,lstYOverlaps):
     """
@@ -230,16 +255,48 @@ def collisionTimeFromOverlaps(lstXOverlaps,lstYOverlaps):
 
 
 """
+file input
+"""
+
+file1 = open("input")
+lines = file1.read().split('\n')
+line1 = lines[1].split(' ')
+line2 = lines[2].split(' ')
+linEdge = line1[0]
+cirEdge = line2[0]
+linX = line1[1]
+cirX = line2[1]
+linY = line1[2]
+cirY = line1[2]
+linVeloX = line1[3]
+centerX = line2[3]
+centerY = line2[4]
+linVeloY = line1[4]
+cirLinSpeed = line2[5]
+
+print(linEdge, linX, linY, linVeloX, linVeloY)
+print(cirEdge, cirX, cirY, centerX, centerY, cirLinSpeed)
+
+
+
+
+
+
+
+
+
 
 
 print "here we start the angle check."
 squarePoss=[(1,1),(-1,1),(1,-1),(-1,-1)]
 for pos in squarePoss:
-    print "circle pos",pos,getCricleStart(pos,(0,0))
+    print "circle pos",pos,(getCricleStart(pos,(0,0)))
 
 
 print "here we end the angle check."
-"""
+
+
+
 print "here we start checking collision from overlap"
 lstTestCases=[]
 #first we check for a list with 1 collision ;expected output: 4 :pass
