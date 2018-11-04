@@ -140,6 +140,7 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
 
 
 
+
     circleSqEdge= abs((cirSqBounds[0]-cirSqBounds[1]))/2                      #actually describes half of the length of the edge
 
     circleLimitsMin=centerOfCircle-radius-circleSqEdge
@@ -179,8 +180,7 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
     #the derivative of both of thesee will be the same.
     derCosineParams=bisection.derCosineWeights(cosineParams1)
     maxDerivCos= derCosineParams[1]                   #ask Thomas about this
-    zerosLinMax=[]
-    zerosLinMin=[]
+    zerosLin=[]
     for i in range(0, numOfPasses):
 
         isPeakMax = True  # this describes if the angle of the last peak was at 0 (true) or pi (false)
@@ -199,16 +199,12 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
                 #we can do this by finding the roots of the derivative and you check from the first peak to the first 0,
                 # from the first 0 to the second 0, then from the second 0 to the last peak.
             else:
-                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence, derCosineParams)
-                if(zero in zerosLinMin):
-                    dummy = "us"
-                else:
-                    zerosLinMin.append(zero)
-                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams2, 0, errorTolerence, derCosineParams)
-                if (zero in zerosLinMax):
-                    dummy = "us"
-                else:
-                    zerosLinMax.append(zero)
+                if bisection.cosineFunction((timeOfPreviousPeak+peakTimeIntervals * (i-1)),cosineParams1)*bisection.cosineFunction((timeOfPreviousPeak+peakTimeIntervals * (i)),cosineParams1)<=0:
+                    zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence, derCosineParams)
+                    zerosLin.append(zero)
+                if bisection.cosineFunction((timeOfPreviousPeak+peakTimeIntervals * (i-1)),cosineParams2)*bisection.cosineFunction((timeOfPreviousPeak+peakTimeIntervals * (i)),cosineParams2)<=0:
+                    zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence, derCosineParams)
+                    zerosLin.append(zero)
         else:
             if maxDerivCos>dimensionalVelocity and dimensionalVelocity>0:
                 #TODO find where we need to check between for possible multiple crossings
@@ -216,17 +212,22 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
                 q=1
                 print"hey"
             else:
-                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams1, 0, errorTolerence,derCosineParams)
-                if(zero in zerosLinMin):
-                    print()
-                else:
-                    zerosLinMin.append(zero)
-                zero, _ = bisection.newtonMethod((timeOfPreviousPeak+peakTimeIntervals * (i-1)), (timeOfPreviousPeak + peakTimeIntervals * i),cosineParams2, 0, errorTolerence,derCosineParams)
-                if (zero in zerosLinMax):
-                    print()
-                else:
-                    zerosLinMax.append(zero)
-    return zerosLinMax,zerosLinMin
+                if bisection.cosineFunction((timeOfPreviousPeak + peakTimeIntervals * (i - 1)),
+                                            cosineParams1) * bisection.cosineFunction(
+                        (timeOfPreviousPeak + peakTimeIntervals * (i)), cosineParams1) <= 0:
+                    zero, _ = bisection.newtonMethod((timeOfPreviousPeak + peakTimeIntervals * (i - 1)),
+                                                     (timeOfPreviousPeak + peakTimeIntervals * i), cosineParams1, 0,
+                                                     errorTolerence, derCosineParams)
+                    zerosLin.append(zero)
+                if bisection.cosineFunction((timeOfPreviousPeak + peakTimeIntervals * (i - 1)),
+                                            cosineParams2) * bisection.cosineFunction(
+                        (timeOfPreviousPeak + peakTimeIntervals * (i)), cosineParams2) <= 0:
+                    zero, _ = bisection.newtonMethod((timeOfPreviousPeak + peakTimeIntervals * (i - 1)),
+                                                     (timeOfPreviousPeak + peakTimeIntervals * i), cosineParams1, 0,
+                                                     errorTolerence, derCosineParams)
+                    zerosLin.append(zero)
+
+    return zerosLin
 def collisionTimeFromOverlaps(lstXOverlaps,lstYOverlaps):
     """
     this function will find the collision time if you input the times where objects overlap in the x direction and where
@@ -262,17 +263,17 @@ file1 = open("input.txt")
 lines = file1.read().split('\n')
 line1 = lines[1].split(' ')
 line2 = lines[2].split(' ')
-linEdge = line1[0]
-cirEdge = line2[0]
-linX = line1[1]
-cirX = line2[1]
-linY = line1[2]
-cirY = line1[2]
-linVeloX = line1[3]
-centerX = line2[3]
-centerY = line2[4]
-linVeloY = line1[4]
-cirLinSpeed = line2[5]
+linEdge = float(line1[0])
+cirEdge = float(line2[0])
+linX = float(line1[1])
+cirX = float(line2[1])
+linY = float(line1[2])
+cirY = float(line1[2])
+linVeloX = float(line1[3])
+centerX = float(line2[3])
+centerY = float(line2[4])
+linVeloY = float(line1[4])
+cirLinSpeed = float(line2[5])
 
 print(linEdge, linX, linY, linVeloX, linVeloY)
 print(cirEdge, cirX, cirY, centerX, centerY, cirLinSpeed)
@@ -314,13 +315,13 @@ for testCase in lstTestCases:
 
 print "here we stop checking collision from overlap"
 print bisection.derCosineWeights([1,2,3,4,5,6])
-linearStartLocation=(-10.0,-10.0)
-cirSquareStartLoc=(0.0,5.0)
-linearSideLength=2
-cirSquareSideLength=2
-cirSpeed=900
-dimensionalXVelocity=8000
-centerOfCir=(0.0,0.0)
+linearStartLocation=(linX,linY)
+cirSquareStartLoc=(cirX,cirY)
+linearSideLength=linEdge
+cirSquareSideLength=cirEdge
+cirSpeed=cirLinSpeed
+dimensionalXVelocity=linX
+centerOfCir=(centerX,centerY)
 cirSquareStartBoundsx,cirSquareStartBoundsy=findSidesAtStart(cirSquareStartLoc,cirSquareSideLength)
 radius,startAngle=getCricleStart(cirSquareStartLoc,centerOfCir)
 radSpeed=speedInRadians(radius,cirSpeed)
