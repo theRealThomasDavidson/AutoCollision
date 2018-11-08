@@ -138,13 +138,11 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
     ##TODO cont do we even run this side or should we have another function
 
 
-
-
-
     circleSqEdge= abs((cirSqBounds[0]-cirSqBounds[1]))/2                      #actually describes half of the length of the edge
 
     circleLimitsMin=centerOfCircle-radius-circleSqEdge
     circleLimitsMax=centerOfCircle+radius+circleSqEdge
+
     squaresInQuestionTime1=(linSqBounds[0]-circleLimitsMin)/dimensionalVelocity
     squaresInQuestionTime2=(linSqBounds[1]-circleLimitsMax)/dimensionalVelocity
     if squaresInQuestionTime1>squaresInQuestionTime2:
@@ -153,41 +151,36 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
     else:
         startTime = squaresInQuestionTime1
         endTime = squaresInQuestionTime2
-
     #here we see where the circle square is at the start
-    print "start time",startTime
-
     firstPossibleAngle=(startAngle+(startTime*radSpeed))%(2*math.pi)
-    print "start angle", firstPossibleAngle
     lastPossibleAngle=(startAngle+(endTime*radSpeed))%(2*math.pi)
-    print "last angle", lastPossibleAngle
-    firstPossibleCirSquareBounds=cicularMotion(cirSqBounds, radius,radSpeed,startAngle,startTime)
-    firstPeakBefore=math.floor((firstPossibleAngle/math.pi))
-    print "yo hey",firstPeakBefore
-
+    peakTimeIntervals = radSpeed / math.pi
     ##if it is false we will have the cosine as a negative.
     timeOfPreviousPeak=startTime-(radSpeed*(firstPossibleAngle%math.pi))            #describes the time of the last peak before entering the area where they might interact
     timeofPeakAfterExit=endTime+ (radSpeed*(lastPossibleAngle%math.pi))
-    peakTimeIntervals=radSpeed/math.pi                              #describes half of a period
-    """
-    """
+                                #describes half of a period
+
+    firstPeakBefore=peakTimeIntervals*math.floor((firstPossibleAngle/peakTimeIntervals))
+    print "1st angle",firstPossibleAngle
+    print "peak before", firstPeakBefore
+    print "prev peak time",timeOfPreviousPeak
     numOfPasses=int(math.floor(((timeofPeakAfterExit-timeOfPreviousPeak)/peakTimeIntervals)+.5))-1
     #parameters finding the crossing point between the min of circle square and the max of linear square
     cosineParams1=[(centerOfCircle-circleSqEdge),radius,startAngle,radSpeed,linSqBounds[0],dimensionalVelocity]
 
     #parameters finding the crossing point between the max of circle square and the min of linear square
     cosineParams2=[(centerOfCircle+circleSqEdge),radius,startAngle,radSpeed,linSqBounds[1],dimensionalVelocity]
-    #the derivative of both of thesee will be the same.
+    #the derivative of both of the see will be the same.
     derCosineParams=bisection.derCosineWeights(cosineParams1)
     maxDerivCos= derCosineParams[1]                   #ask Thomas about this
     zerosLin=[]
     for i in range(0, numOfPasses):
 
         isPeakMax = True  # this describes if the angle of the last peak was at 0 (true) or pi (false)
-        print("peaktimestuff")
-        print(timeOfPreviousPeak)
-        print(peakTimeIntervals)
-        print((timeOfPreviousPeak+peakTimeIntervals * (i-1)) + 2)
+        #print("peaktimestuff")
+        #print(timeOfPreviousPeak)
+        #print(peakTimeIntervals)
+        #print((timeOfPreviousPeak+peakTimeIntervals * (i-1)) + 2)
         if (int((timeOfPreviousPeak+peakTimeIntervals * (i-1))) + 2) % 2 == 1:
             isPeakMax = False
         if isPeakMax:               #current derivative goes down
@@ -210,7 +203,7 @@ def findDimensionalOverlapTime(cirSqBounds,linSqBounds,startAngle,radSpeed,radiu
                 #TODO find where we need to check between for possible multiple crossings
                 #TODO implement a method that works like below with the checks as bounds
                 q=1
-                print"hey"
+                #print"hey"
             else:
                 if bisection.cosineFunction((timeOfPreviousPeak + peakTimeIntervals * (i - 1)),
                                             cosineParams1) * bisection.cosineFunction(
