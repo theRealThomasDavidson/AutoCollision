@@ -134,7 +134,7 @@ def findDimensionalOverlapTime(cirSqBounds, linSqBounds, startAngle, radSpeed, r
     the min the bounderies of a square that is moving in a circular path
     :param linSqBounds: a tuples of the form (dbl,dbl) where the first element is the max and the second element is the
     min of the bounds of a square that is moving in a constant linear speed
-    :param startAngle:  a dbl that describes what angle the square is along the circle at time=0
+    :param startAngle:  a dbl that describes what angle the square is along the circle at time=0 assumes we are in X (add pi/2 for y)
     :param radSpeed: a dbl that describes the speed of the square in radians around the circle
     :param radius: a dbl that describes the radius of the circle
     :param centerOfCircle: a dbl that describes the location of the center of the circle in this dimension
@@ -152,8 +152,6 @@ def findDimensionalOverlapTime(cirSqBounds, linSqBounds, startAngle, radSpeed, r
 
     ##########################
 
-    ##TODO if deminsionalVelocity is 0 we need to figure out how long we run this for
-    ##TODO cont do we even run this side or should we have another function
 
     circleSqEdge = abs((cirSqBounds[0] - cirSqBounds[1])) / 2  # actually describes half of the length of the edge
 
@@ -173,12 +171,12 @@ def findDimensionalOverlapTime(cirSqBounds, linSqBounds, startAngle, radSpeed, r
         endTime = squaresInQuestionTime2
 
     # here we see where the circle square is at the start
-    print "start time", startTime
+    #print "start time", startTime
 
     firstPossibleAngle = (startAngle + (startTime * radSpeed)) % (2 * math.pi)
-    print"start angle", firstPossibleAngle
+    #print"start angle", firstPossibleAngle
     lastPossibleAngle = (startAngle + (endTime * radSpeed)) % (2 * math.pi)
-    print"last angle", lastPossibleAngle
+    #print"last angle", lastPossibleAngle
 
     ## Lydia: Changed function call to work with fixed circularMotion function ##
     firstPossibleCirSquareBounds = circularMotion(centerOfCircle, circleSqEdge * 2, radius, radSpeed, startAngle,
@@ -186,7 +184,6 @@ def findDimensionalOverlapTime(cirSqBounds, linSqBounds, startAngle, radSpeed, r
 
     firstPeakBefore = math.floor(
         (firstPossibleAngle / math.pi))  # first cosine extremum before A enters range of B (is 0 for max, 1 for min)
-    print "yo hey", firstPeakBefore
 
     ##if it is false we will have the cosine as a negative.
 
@@ -274,8 +271,6 @@ def findDimensionalOverlapTime(cirSqBounds, linSqBounds, startAngle, radSpeed, r
                 # TODO find where we need to check between for possible multiple crossings
                 # TODO implement a method that works like below with the checks as bounds
                 q = 1
-                print
-                "hey"
             else:
                 ## Lydia: Changed (i-1) to (i+1) so correct half-period would be checked instead of previous half-period ##
 
@@ -300,7 +295,8 @@ def findDimensionalOverlapTime(cirSqBounds, linSqBounds, startAngle, radSpeed, r
 def findOverlapIntNoDimVelocity(cirSqBounds, linSqBounds, startAngle, radSpeed, radius, centerOfCircle, endTime):
 
     """
-    this function
+    this function finds overlap times if the dimensional velocity is 0 and must be implemented with a time to end the loop so that it resolves.
+
     :param cirSqBounds: is a tuple of the form (dbl,dbl) where the first element is the max and the second element is
     the min the bounderies of a square that is moving in a circular path
     :param linSqBounds: a tuples of the form (dbl,dbl) where the first element is the max and the second element is the
@@ -314,6 +310,37 @@ def findOverlapIntNoDimVelocity(cirSqBounds, linSqBounds, startAngle, radSpeed, 
     overlap of the two squares in this dimension starts and the second element is when it ends. the list will have a
     tuple for each separate incident of overlap it may be an empty list this should be handled pretty well for the program as is (11/11/2018 13,37EST).
     """
+    ##########################
+
+    ##########################
+
+    errorTolerence = .000001
+
+    ##########################
+
+    ##########################
+
+    #first define functions and variables we need for the 2 half period checks
+    circleSqEdge = abs((cirSqBounds[0] - cirSqBounds[1])) / 2  # actually describes half of the length of the edge
+
+    circleLimitsMin = centerOfCircle - radius - circleSqEdge
+    circleLimitsMax = centerOfCircle + radius + circleSqEdge
+
+
+
+
+    #next check if the square passes through the cricle at all if it doesn't then retrun an empty list
+    if cirSqBounds[0]<circleLimitsMin or cirSqBounds[1]<circleLimitsMax :
+        return []               #how very pythonic
+
+    #we then find all overlap starts and end over 2 half periods and from now on treat them like a whole period
+    #we next check if the square started in an overlap or not
+    #   if overlap: we say the start of the first overlap is 0 and the second is the first time keep adding times til we are out of them then finish with the first time
+    #   else: we say the first time is the start of the first overlap carry on the same way end with the last crossing time.
+    #append list with times +N*period til the end overlap time is after the end time.
+    #return list
+
+
 
 def collisionTimeFromOverlaps(lstXOverlaps, lstYOverlaps):
     """
@@ -379,7 +406,8 @@ lstTestCases.append(([(4.0, 5.0)], [(2.0, 4.5)]))
 lstTestCases.append(([(1.0, 2.0)], [(0.2, 0.5), (3.0, 5.2)]))
 # check for a list with multiple collision; expected output:2.0 :pass
 lstTestCases.append(([(1.40, 2.1), (3.2, 5.3), (6.4, 7.8)], [(2.0, 3.5), (4.0, 7.2)]))
-
+# check for an empty list: expected output: None :pass
+lstTestCases.append(([], [(2.0, 3.5), (4.0, 7.2)]))
 for testCase in lstTestCases:
     xOverlap = testCase[0]
     yOverlap = testCase[1]
