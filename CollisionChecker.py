@@ -213,7 +213,7 @@ def findDimensionalOverlapTime(cirSqBounds, linSqBounds, startAngle, radSpeed, r
     maxDerivCos = derCosineParams[1]  # ask Thomas about this
     zerosLin = []
 
-    print("numOfPasses", numOfPasses)
+    #print("numOfPasses", numOfPasses)
 
     for i in range(0, numOfPasses):
 
@@ -236,7 +236,7 @@ def findDimensionalOverlapTime(cirSqBounds, linSqBounds, startAngle, radSpeed, r
             if firstPeakBefore == 1:
                 isPeakMax = i % 2
 
-        #print("isPeakMax", isPeakMax)
+        #print("isPeakMax", bool(isPeakMax))
 
         if isPeakMax:  # current derivative goes down
             if -maxDerivCos < dimensionalVelocity and dimensionalVelocity < 0:
@@ -314,7 +314,7 @@ def findOverlapIntNoDimVelocity(cirSqBounds, linSqBounds, startAngle, radSpeed, 
 
     ##########################
 
-    errorTolerence = .000001
+    errorTolerence = .00000000000001
 
     ##########################
 
@@ -322,24 +322,50 @@ def findOverlapIntNoDimVelocity(cirSqBounds, linSqBounds, startAngle, radSpeed, 
 
     #first define functions and variables we need for the 2 half period checks
     circleSqEdge = abs((cirSqBounds[0] - cirSqBounds[1])) / 2  # actually describes half of the length of the edge
-
     circleLimitsMin = centerOfCircle - radius - circleSqEdge
     circleLimitsMax = centerOfCircle + radius + circleSqEdge
-
-
-
-
+    cosineParams1 = [(centerOfCircle - circleSqEdge), radius, startAngle, radSpeed, linSqBounds[0], 0]
+    cosineParams2 = [(centerOfCircle + circleSqEdge), radius, startAngle, radSpeed, linSqBounds[1], 0]
+    derCosineParams = bisection.derCosineWeights(cosineParams1)
+    startTime=startAngle/radSpeed
+    peakTimeInterval=math.pi / radSpeed
     #next check if the square passes through the cricle at all if it doesn't then retrun an empty list
-    if cirSqBounds[0]<circleLimitsMin or cirSqBounds[1]<circleLimitsMax :
+    if linSqBounds[0]<circleLimitsMin or linSqBounds[1]<circleLimitsMax :
         return []               #how very pythonic
 
     #we then find all overlap starts and end over 2 half periods and from now on treat them like a whole period
-    #we next check if the square started in an overlap or not
-    #   if overlap: we say the start of the first overlap is 0 and the second is the first time keep adding times til we are out of them then finish with the first time
-    #   else: we say the first time is the start of the first overlap carry on the same way end with the last crossing time.
-    #append list with times +N*period til the end overlap time is after the end time.
-    #return list
+    zerosList=[]
+    if  linSqBounds[0]<circleLimitsMax:
+        zero, _ = bisection.newtonMethod(startTime,(startTime+peakTimeInterval), cosineParams1, 0, errorTolerence, derCosineParams)
+        zerosList.append(zero)
+    if linSqBounds[1] < circleLimitsMin:
+        zero, _ = bisection.newtonMethod(startTime,(startTime+peakTimeInterval), cosineParams2, 0, errorTolerence, derCosineParams)
+        zerosList.append(zero)
 
+    if linSqBounds[0] < circleLimitsMax:
+        zero, _ = bisection.newtonMethod((startTime+peakTimeInterval),(startTime+(2*peakTimeInterval)), cosineParams1, 0, errorTolerence, derCosineParams)
+        zerosList.append(zero)
+    if linSqBounds[1] < circleLimitsMin:
+        zero, _ = bisection.newtonMethod((startTime+peakTimeInterval),(startTime+(2*peakTimeInterval)), cosineParams2, 0, errorTolerence, derCosineParams)
+        zerosList.append(zero)
+
+    zerosList.sort()
+    zerosInPeriod=len(zerosList)
+    #append list with times +N*period til the end overlap time is after the end time.
+    lastTime=0
+    while lastTime<endTime:
+        tempList=[x + 1 for x in zerosList[:zerosInPeriod]]
+        for y in tempList:
+            zerosList.append(y)
+        lastTime+=2*peakTimeInterval
+    overlapList=[]
+    if linSqBounds[0] > cirSqBounds[1] or linSqBounds[1] < cirSqBounds[0]:
+        zerosList.append(0)
+        zerosList.sort()
+    for i in range(0, zerosInPeriod, 2)
+    overlapList.append(zerosList[i],zerosList[i+1])
+    #return list
+    return overlapList
 
 
 def collisionTimeFromOverlaps(lstXOverlaps, lstYOverlaps):
@@ -428,3 +454,10 @@ radSpeed = speedInRadians(radius, cirSpeed)
 xBounds, yBounds = findSidesAtStart(linearStartLocation, linearSideLength)
 findDimensionalOverlapTime(cirSquareStartBoundsx, xBounds, startAngle, radSpeed, radius, centerOfCir[0],
                            dimensionalXVelocity)
+"""
+method for checking for collision given dimvelX=0 and dimvelY=0
+returns collision time if collision or None if no collision
+xOverlap=findOverlapIntNoDimVelocity(x components,0)
+yOverlap=findOverlapIntNoDimVelocity(y components,0)
+print collisionTimeFromOverlaps(xOverlap, yOverlap)
+"""
